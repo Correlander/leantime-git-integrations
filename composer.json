@@ -1,9 +1,32 @@
 {
   "name": "Leantime GitHub Integration",
-  "description": "Per-user GitHub integration for Leantime projects and to-dos.",
+  "description": "GitHub App integration for Leantime projects and To-dos, contributed through Leantime Library.",
   "version": "0.2.0",
-  "homepage": "",
-  "authors": [{"name": "Correlander", "email": ""}],
+  "homepage": "https://github.com/Correlander/leantime-git-integrations",
+  "authors": [
+    {
+      "name": "Alexander K.",
+      "homepage": "https://github.com/Correlander",
+      "role": "Developer"
+    }
+  ],
   "type": "leantime-plugin",
-  "autoload": {"psr-4": {"Leantime\\Plugins\\GitHubIntegration\\": ""}}
+  "autoload": {
+    "psr-4": {
+      "Leantime\\Plugins\\GitHubIntegration\\": ""
+    }
+  },
+  "license": "proprietary",
+  "keywords": [
+    "leantime",
+    "leantime-plugin",
+    "github",
+    "integrations",
+    "project-management"
+  ],
+  "support": {
+    "issues": "https://github.com/Correlander/leantime-git-integrations/issues",
+    "source": "https://github.com/Correlander/leantime-git-integrations",
+    "docs": "https://github.com/Correlander/leantime-git-integrations#readme"
+  }
 }

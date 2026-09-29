@@ -6,7 +6,7 @@ This repository contains one provider plugin for Leantime 3.10.0. It uses the ex
 
 The files in this repository root are the GitHub provider plugin. Install them so `composer.json` is at `app/Plugins/GitHubIntegration/composer.json`. The deployed plugin folder must be named exactly `GitHubIntegration`; `LeantimeGitIntegrations` is only the development/repository folder name. Copy the repository contents into `app/Plugins/GitHubIntegration/` (do not create an extra nested `GitHubIntegration/GitHubIntegration/` folder).
 
-Also update the existing `app/Plugins/LeantimeLib/` from the LeantimeLib project to version `0.3.0` or later for its project integration and To-do contribution registries.
+Also update the existing `app/Plugins/LeantimeLib/` from the LeantimeLib project to version `0.3.2` or later for its project integration and To-do contribution registries.
 
 Enable both plugins for the full experience. GitHubIntegration contributes its Project Settings panel and To-do section through LeantimeLib's registries; LeantimeLib places the section at Leantime's supported after-Schedule hook and applies the Library-defined order. The GitHub backend routes remain independent, but both UI contributions need LeantimeLib enabled.
 
@@ -57,3 +57,7 @@ tail -F storage/logs/leantime-$(date +%F).log
 ```
 
 If the file is absent or does not receive entries, check `LEAN_LOG_CHANNELS` in the Leantime environment: an installation can route its stack to syslog/Sentry or customize/remove the `single` file channel. Browser-side failures are also printed in DevTools Console with the `[GitHubIntegration]` prefix.
+
+## License
+
+All rights reserved. See [LICENSE](LICENSE).
