@@ -1,0 +1,6 @@
+.github-todo-section { margin-top: 1.25rem; }
+.github-todo-content { padding: .5rem 0; }
+.github-todo-content h5 { margin: .75rem 0 .35rem; }
+.github-branch-row { display: flex; gap: .5rem; max-width: 42rem; }
+.github-branch-row input { flex: 1; }
+.github-project-panel { padding: .75rem 0; }
