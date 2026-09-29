@@ -77,6 +77,7 @@ class GitHub
                 'client_id' => $config['clientId'],
                 'client_secret' => $config['clientSecret'],
                 'code' => $request->query('code'),
+                'redirect_uri' => rtrim(BASE_URL, '/').'/GitHubIntegration/callback',
             ]);
             if (! $tokenResponse->successful() || ! is_string($tokenResponse->json('access_token'))) {
                 Log::error('GitHub OAuth token exchange was rejected.', ['http_status' => $tokenResponse->status()]);
