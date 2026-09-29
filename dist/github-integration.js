@@ -30,6 +30,7 @@
             else html += '<p>Your Leantime role does not allow branch creation for this to-do.</p>';
             node.innerHTML = html;
         } catch (error) {
+            console.error('[GitHubIntegration] Could not load To-do GitHub details.', error);
             node.innerHTML = `<div class="alert alert-warning" role="alert">${esc(error.message)}</div>`;
         }
     }
@@ -64,6 +65,7 @@
             if (status) status.textContent = projectForm ? ' Saved.' : ` Created ${result.name}.`;
             if (branchForm) loadTodo(form.closest('[data-github-todo]'));
         } catch (error) {
+            console.error('[GitHubIntegration] GitHub action failed.', error);
             if (status) status.textContent = ` ${error.message}`;
         } finally {
             if (button && button.isConnected) button.disabled = false;
@@ -87,6 +89,10 @@
             if (!response.ok) throw new Error(result.error || 'Could not disconnect.');
             if (disconnectProject) status.textContent = ' Repository disconnected. Reload the page to configure another.';
             else location.reload();
-        } catch (error) { status.textContent = ` ${error.message}`; button.disabled = false; }
+        } catch (error) {
+            console.error('[GitHubIntegration] Disconnect action failed.', error);
+            status.textContent = ` ${error.message}`;
+            button.disabled = false;
+        }
     });
 })();

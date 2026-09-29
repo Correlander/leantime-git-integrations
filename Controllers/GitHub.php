@@ -31,7 +31,10 @@ class GitHub
     {
         if ((int) session('userdata.id', 0) < 1) abort(401);
         try { $config = $this->storage->appConfig(); }
-        catch (Throwable) { return redirect(BASE_URL.'/GitHubIntegration/settings?github_error=secret_key_changed'); }
+        catch (Throwable $exception) {
+            $this->logFailure('GitHub App secret could not be decrypted during connect.', $exception);
+            return redirect(BASE_URL.'/GitHubIntegration/settings?github_error=secret_key_changed');
+        }
         if ($config === null) return redirect(BASE_URL.'/GitHubIntegration/settings');
         $state = Str::random(64);
         $returnTo = (string) $request->query('return_to', '/GitHubIntegration/settings');
@@ -63,7 +66,10 @@ class GitHub
         if ($request->filled('error')) return $this->oauthRedirect($returnTo, 'github_error=authorization_denied');
 
         try { $config = $this->storage->appConfig(); }
-        catch (Throwable) { return $this->oauthRedirect($returnTo, 'github_error=secret_key_changed'); }
+        catch (Throwable $exception) {
+            $this->logFailure('GitHub App secret could not be decrypted during OAuth callback.', $exception);
+            return $this->oauthRedirect($returnTo, 'github_error=secret_key_changed');
+        }
         if ($config === null || ! $request->filled('code')) return $this->oauthRedirect($returnTo, 'github_error=not_configured');
 
         try {
@@ -73,6 +79,7 @@ class GitHub
                 'code' => $request->query('code'),
             ]);
             if (! $tokenResponse->successful() || ! is_string($tokenResponse->json('access_token'))) {
+                Log::error('GitHub OAuth token exchange was rejected.', ['http_status' => $tokenResponse->status()]);
                 return $this->oauthRedirect($returnTo, 'github_error=token_exchange');
             }
             $access = $tokenResponse->json('access_token');
@@ -93,7 +100,7 @@ class GitHub
             );
             return $this->oauthRedirect($returnTo, 'github_connected=1');
         } catch (Throwable $exception) {
-            Log::warning('GitHub OAuth callback failed.', ['status' => (int) $exception->getCode()]);
+            $this->logFailure('GitHub OAuth callback failed.', $exception, ['leantime_user_id' => $userId]);
             return $this->oauthRedirect($returnTo, 'github_error=connection_failed');
         }
     }
@@ -104,10 +111,13 @@ class GitHub
         if ($userId < 1) abort(401);
         $token = $this->storage->userToken($userId);
         try { $config = $this->storage->appConfig(); }
-        catch (Throwable) { $config = null; }
+        catch (Throwable $exception) {
+            $this->logFailure('GitHub App secret could not be decrypted during disconnect.', $exception, ['leantime_user_id' => $userId]);
+            $config = null;
+        }
         if ($token && $config) {
             try { $this->api->deleteToken($config['clientId'], $config['clientSecret'], $token['accessToken']); }
-            catch (Throwable $exception) { Log::warning('GitHub token revocation failed.', ['status' => (int) $exception->getCode()]); }
+            catch (Throwable $exception) { $this->logFailure('GitHub token revocation failed.', $exception, ['leantime_user_id' => $userId]); }
         }
         $this->storage->disconnectUser($userId);
         return response()->json(['ok' => true]);
@@ -156,7 +166,7 @@ class GitHub
             );
             return response()->json(['ok' => true]);
         } catch (Throwable $exception) {
-            Log::warning('GitHub repository verification failed.', ['status' => (int) $exception->getCode()]);
+            $this->logFailure('GitHub repository verification failed.', $exception, ['project_id' => $projectId]);
             return response()->json(['error' => 'Could not verify this repository. Check its name and your GitHub access.'], 422);
         }
     }
@@ -195,7 +205,7 @@ class GitHub
             });
             return response()->json(['connected' => true, 'githubLinked' => true, 'appConfigured' => $appConfigured, 'canCreateBranch' => $canCreate, 'repository' => $connection->repository_owner.'/'.$connection->repository_name] + $data);
         } catch (Throwable $exception) {
-            Log::warning('GitHub To-do data request failed.', ['status' => (int) $exception->getCode()]);
+            $this->logFailure('GitHub To-do data request failed.', $exception, ['ticket_id' => $ticketId, 'project_id' => (int) $ticket->projectId]);
             if (in_array((int) $exception->getCode(), [403, 404], true)) {
                 return response()->json(['error' => 'Your linked GitHub account cannot access this repository, or GitHub has temporarily rate-limited this request.'], 403);
             }
@@ -226,7 +236,7 @@ class GitHub
             Cache::forget('github.todo.'.(int) session('userdata.id').'.'.$ticketId);
             return response()->json(['ok' => true, 'name' => $branch, 'url' => $created['url'] ?? null]);
         } catch (Throwable $exception) {
-            Log::warning('GitHub branch creation failed.', ['status' => (int) $exception->getCode()]);
+            $this->logFailure('GitHub branch creation failed.', $exception, ['ticket_id' => $ticketId, 'project_id' => (int) $ticket->projectId]);
             return response()->json(['error' => 'Branch creation failed. Check that your GitHub account can write to the connected repository and that the base branch exists.'], 422);
         }
     }
@@ -262,7 +272,10 @@ class GitHub
         if (empty($token['refreshToken']) || empty($token['refreshExpiresAt']) || now()->gte($token['refreshExpiresAt'])) return null;
 
         try { $config = $this->storage->appConfig(); }
-        catch (Throwable) { return null; }
+        catch (Throwable $exception) {
+            $this->logFailure('GitHub App secret could not be decrypted while refreshing a user token.', $exception, ['leantime_user_id' => $userId]);
+            return null;
+        }
         if (! $config) return null;
         try {
             $response = Http::asForm()->acceptJson()->timeout(15)->post('https://github.com/login/oauth/access_token', [
@@ -271,8 +284,14 @@ class GitHub
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $token['refreshToken'],
             ]);
-        } catch (Throwable) { return null; }
-        if (! $response->successful() || ! is_string($response->json('access_token'))) return null;
+        } catch (Throwable $exception) {
+            $this->logFailure('GitHub user token refresh request failed.', $exception, ['leantime_user_id' => $userId]);
+            return null;
+        }
+        if (! $response->successful() || ! is_string($response->json('access_token'))) {
+            Log::error('GitHub rejected a user token refresh.', ['leantime_user_id' => $userId, 'http_status' => $response->status()]);
+            return null;
+        }
         $newAccess = $response->json('access_token');
         $newRefresh = $response->json('refresh_token');
         $this->storage->saveUserToken(
@@ -282,5 +301,16 @@ class GitHub
             now()->addSeconds((int) $response->json('refresh_token_expires_in', 15811200))->toDateTimeString()
         );
         return $newAccess;
+    }
+
+    /** Log useful diagnostics without recording credentials, request bodies, or provider response bodies. */
+    private function logFailure(string $message, Throwable $exception, array $context = []): void
+    {
+        Log::error($message, $context + [
+            'exception_class' => $exception::class,
+            'exception_code' => (int) $exception->getCode(),
+            'exception_file' => basename($exception->getFile()),
+            'exception_line' => $exception->getLine(),
+        ]);
     }
 }

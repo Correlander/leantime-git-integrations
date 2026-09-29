@@ -4,12 +4,13 @@ This repository contains one provider plugin for Leantime 3.10.0. It uses the ex
 
 ## Deployment folders
 
-Copy these two folders directly under the Leantime `app/Plugins/` directory. Do not copy the repository parent as the plugin directory:
+The files in this repository root are the GitHub provider plugin. Install them so `composer.json` is at `app/Plugins/GitHubIntegration/composer.json`. The deployed plugin folder must be named exactly `GitHubIntegration`; `LeantimeGitIntegrations` is only the development/repository folder name. Copy the repository contents into `app/Plugins/GitHubIntegration/` (do not create an extra nested `GitHubIntegration/GitHubIntegration/` folder).
 
-- `app/Plugins/GitHubIntegration/`
-- Update the existing `app/Plugins/LeantimeLib/` from the LeantimeLib project to version `0.2.0` or later.
+Also update the existing `app/Plugins/LeantimeLib/` from the LeantimeLib project to version `0.2.1` or later if you want the project Integrations panel registered through the Library.
 
-Enable LeantimeLib before enabling GitHubIntegration. Both plugins must remain enabled for the project Integrations panel and To-do section to work.
+Enable both plugins for the full experience. GitHubIntegration has no hard dependency on LeantimeLib: its To-do section uses Leantime's native hook and works independently. LeantimeLib is needed only to centrally register the GitHub project settings panel.
+
+If LeantimeLib is later disabled while GitHubIntegration remains enabled, the GitHub project settings panel will no longer be added to Project Settings → Integrations; Leantime's native Integrations content will remain. The GitHub To-do section and its backend routes continue to load. Disabling LeantimeLib does not uninstall GitHubIntegration, invoke its uninstall handler, remove its tables, or delete GitHub settings/tokens. Re-enable LeantimeLib to restore the centralized provider panel.
 
 ## First setup
 
@@ -43,3 +44,16 @@ Enable LeantimeLib before enabling GitHubIntegration. Both plugins must remain e
 ## Contributor contract
 
 The provider contributes its Project Settings panel to LeantimeLib using `leantime.plugins.leantimelib.project.integrations.panels`. Other provider plugins should register their own stable ID, label, and trusted panel renderer through that same Library filter. Provider controllers own their permissions, validation, storage, and secret handling.
+
+## Troubleshooting logs
+
+The provider writes operational failures through Leantime's Laravel logger at `error` level, including OAuth exchange/refresh failures, GitHub API failures, settings persistence errors, and credential-decryption recovery. It does not log OAuth tokens, the Client Secret, request bodies, or full GitHub response bodies. The Library also logs provider-panel/tab rendering exceptions and invalid contributions.
+
+On the default Leantime 3.10.0 logging configuration, the daily application log is under `storage/logs/leantime-YYYY-MM-DD.log` (five days retained). From the Leantime root, find the latest file and follow it while reproducing an issue:
+
+```sh
+ls -lt storage/logs/leantime-*.log | head
+tail -F storage/logs/leantime-$(date +%F).log
+```
+
+If the file is absent or does not receive entries, check `LEAN_LOG_CHANNELS` in the Leantime environment: an installation can route its stack to syslog/Sentry or customize/remove the `single` file channel. Browser-side failures are also printed in DevTools Console with the `[GitHubIntegration]` prefix.

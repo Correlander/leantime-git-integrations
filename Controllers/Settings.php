@@ -3,6 +3,7 @@
 namespace Leantime\Plugins\GitHubIntegration\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Leantime\Core\Auth\Permissions\RequiresPermission;
 use Leantime\Core\Controller\Controller;
 use Leantime\Core\Controller\Frontcontroller;
@@ -44,6 +45,14 @@ class Settings extends Controller
             $this->tpl->setNotification('GitHub App settings saved.', 'success');
             return Frontcontroller::redirect(BASE_URL.'/GitHubIntegration/settings');
         } catch (Throwable $exception) {
+            if (! $exception instanceof ValidationException) {
+                Log::error('GitHub Integration settings could not be saved.', [
+                    'exception_class' => $exception::class,
+                    'exception_code' => (int) $exception->getCode(),
+                    'exception_file' => basename($exception->getFile()),
+                    'exception_line' => $exception->getLine(),
+                ]);
+            }
             $config = app(GitHubStorage::class)->appConfigSummary();
             $this->tpl->assign('clientId', trim((string) ($input['client_id'] ?? ($config['clientId'] ?? ''))));
             $this->tpl->assign('secretSaved', $config !== null);

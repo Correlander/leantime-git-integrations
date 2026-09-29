@@ -4,6 +4,7 @@ namespace Leantime\Plugins\GitHubIntegration\Services;
 
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Contracts\Encryption\DecryptException;
 use RuntimeException;
@@ -77,6 +78,10 @@ class GitHubStorage
             ];
         } catch (DecryptException) {
             // A changed Leantime encryption key invalidates old credentials; let the user relink.
+            Log::error('GitHub Integration discarded an undecryptable user credential; the user must reconnect.', [
+                'leantime_user_id' => $userId,
+                'credential_type' => 'github_user_token',
+            ]);
             $this->disconnectUser($userId);
             return null;
         }
