@@ -1,7 +1,7 @@
 {
   "name": "Leantime GitHub Integration",
   "description": "Per-user GitHub integration for Leantime projects and to-dos.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "homepage": "",
   "authors": [{"name": "Correlander", "email": ""}],
   "type": "leantime-plugin",

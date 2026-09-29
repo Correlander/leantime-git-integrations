@@ -8,12 +8,12 @@ $registration = app()->makeWith(Registration::class, ['pluginId' => 'GitHubInteg
 $registration->addFooterJs(['github-integration.js']);
 $registration->addCss(['github-integration.css']);
 
-EventDispatcher::add_event_listener(
-    'leantime.domain.tickets.templates.submodules.ticketdetails.beforeEndRightColumn',
-    [TodoGitSection::class, 'render']
-);
-
 EventDispatcher::add_filter_listener(
     'leantime.plugins.leantimelib.project.integrations.panels',
     [TodoGitSection::class, 'registerProjectPanel']
+);
+
+EventDispatcher::add_filter_listener(
+    'leantime.plugins.leantimelib.todo.detail.sections',
+    [TodoGitSection::class, 'registerTodoSection']
 );
