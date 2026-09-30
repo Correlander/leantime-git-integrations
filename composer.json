@@ -1,7 +1,7 @@
 {
   "name": "Leantime GitHub Integration",
   "description": "GitHub App integration for Leantime projects and To-dos, contributed through Leantime Library.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "homepage": "https://github.com/Correlander/leantime-git-integrations",
   "authors": [
     {
