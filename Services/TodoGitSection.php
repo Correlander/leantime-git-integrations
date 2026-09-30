@@ -31,7 +31,9 @@ class TodoGitSection
         $panels[] = [
             'id' => 'github',
             'label' => 'GitHub',
-            'render' => static fn (int $projectId): string => app(ProjectPanel::class)->render($projectId),
+            'description' => 'Connect this project to a repository and manage its GitHub settings.',
+            'view' => 'githubintegration::projectPanel',
+            'data' => static fn (int $projectId): array => app(ProjectPanel::class)->data($projectId),
         ];
 
         return $panels;

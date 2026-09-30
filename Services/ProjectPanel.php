@@ -9,11 +9,11 @@ class ProjectPanel
 {
     public function __construct(private GitHubStorage $storage, private PermissionService $permissions) {}
 
-    public function render(int $projectId): string
+    public function data(int $projectId): array
     {
         $connection = $this->storage->project($projectId);
         $linked = $this->storage->userToken((int) session('userdata.id'));
-        return view('githubintegration::projectPanel', [
+        return [
             'projectId' => $projectId,
             'connection' => $connection,
             'githubLogin' => $linked['login'] ?? null,
@@ -22,6 +22,6 @@ class ProjectPanel
             'canConfigure' => $this->permissions->currentUserCan(ProjectsPermissions::EDIT, null, true),
             'oauthError' => request()->query('github_error'),
             'oauthConnected' => request()->query('github_connected'),
-        ])->render();
+        ];
     }
 }

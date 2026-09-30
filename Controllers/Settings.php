@@ -11,6 +11,8 @@ use Leantime\Core\Exceptions\ValidationException;
 use Leantime\Domain\Plugins\Permissions\PluginsPermissions;
 use Leantime\Plugins\GitHubIntegration\Services\GitHubStorage;
 use Leantime\Plugins\LeantimeLib\Services\SettingsPageRenderer;
+use Leantime\Plugins\LeantimeLib\Services\SettingsPage;
+use Leantime\Plugins\LeantimeLib\Services\SettingsPageBlock;
 use Throwable;
 
 class Settings extends Controller
@@ -61,8 +63,8 @@ class Settings extends Controller
 
     private function assignSettingsContent(string $clientId, bool $secretSaved): void
     {
-        if (SettingsPageRenderer::API_VERSION !== 1) {
-            throw new \RuntimeException('GitHub Integration requires a compatible Leantime Library settings renderer.');
+        if (SettingsPageRenderer::API_VERSION !== 1 || SettingsPage::API_VERSION !== 1) {
+            throw new \RuntimeException('GitHub Integration requires Leantime Library 0.16.0 or later for shared settings rendering.');
         }
 
         $callbackUrl = rtrim(BASE_URL, '/').'/GitHubIntegration/callback';
@@ -70,16 +72,15 @@ class Settings extends Controller
             $safeUrl = htmlspecialchars($callbackUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
             return '<div class="form-group"><label for="github_callback_url">Authorization callback URL</label><input class="form-control" id="github_callback_url" type="text" readonly value="'.$safeUrl.'"><p class="help-block">Register this exact URL as the GitHub App callback URL.</p></div>';
         };
-        $settingsHtml = app(SettingsPageRenderer::class)->render([
-            'pluginFolder' => 'GitHubIntegration',
-            'blocks' => [
-                ['type' => 'description', 'text' => 'These credentials identify the company-wide GitHub App. Each Leantime user still authorizes their own GitHub account separately. The client secret is encrypted before storage and never sent back to this page.'],
-                ['type' => 'text', 'id' => 'client_id', 'label' => 'GitHub App Client ID', 'required' => true, 'maxlength' => 255],
-                ['type' => 'secret', 'id' => 'client_secret', 'label' => 'GitHub App Client Secret', 'maxlength' => 4000, 'autocomplete' => 'new-password'],
-                ['type' => 'custom', 'render' => $callbackHtml],
-                ['type' => 'description', 'text' => 'Enable user authorization and grant repository Contents read/write plus Pull requests read. Use GitHub App settings to control installation and organization approval.'],
-            ],
-        ], ['client_id' => $clientId, 'client_secretConfigured' => $secretSaved]);
+        $settingsHtml = SettingsPage::forPlugin('GitHubIntegration')
+            ->insert(
+                SettingsPageBlock::description('These credentials identify the company-wide GitHub App. Each Leantime user still authorizes their own GitHub account separately. The client secret is encrypted before storage and never sent back to this page.'),
+                SettingsPageBlock::text('client_id', 'GitHub App Client ID', ['required' => true, 'maxlength' => 255]),
+                SettingsPageBlock::secret('client_secret', 'GitHub App Client Secret', ['maxlength' => 4000, 'autocomplete' => 'new-password']),
+                SettingsPageBlock::custom($callbackHtml),
+                SettingsPageBlock::description('Enable user authorization and grant repository Contents read/write plus Pull requests read. Use GitHub App settings to control installation and organization approval.')
+            )
+            ->render(['client_id' => $clientId, 'client_secretConfigured' => $secretSaved]);
         $this->tpl->assign('settingsContent', $settingsHtml);
     }
 }
