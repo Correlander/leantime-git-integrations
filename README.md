@@ -6,7 +6,7 @@ This repository contains one provider plugin for Leantime 3.10.0. It uses the ex
 
 The files in this repository root are the GitHub provider plugin. Install them so `composer.json` is at `app/Plugins/GitHubIntegration/composer.json`. The deployed plugin folder must be named exactly `GitHubIntegration`; `LeantimeGitIntegrations` is only the development/repository folder name. Copy the repository contents into `app/Plugins/GitHubIntegration/` (do not create an extra nested `GitHubIntegration/GitHubIntegration/` folder).
 
-Install and enable the existing `LeantimeLib` plugin first, using version `0.16.0` or later. GitHub Integration uses the Library's shared settings page builder and contribution registries; it does not bundle duplicate settings UI or a fallback form.
+Install and enable the existing `LeantimeLib` plugin first, using version `0.17.0` or later. GitHub Integration uses the Library's shared settings page builder and contribution registries; it does not bundle duplicate settings UI or a fallback form.
 
 Enable both plugins for the full experience. GitHubIntegration contributes its Project Settings panel and To-do section through LeantimeLib's registries; LeantimeLib places the section at Leantime's supported after-Schedule hook and applies the Library-defined order. Other GitHub OAuth/API routes remain independent, but the settings page and UI contributions require LeantimeLib enabled.
 

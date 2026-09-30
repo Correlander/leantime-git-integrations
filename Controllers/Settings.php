@@ -63,8 +63,8 @@ class Settings extends Controller
 
     private function assignSettingsContent(string $clientId, bool $secretSaved): void
     {
-        if (SettingsPageRenderer::API_VERSION !== 1 || SettingsPage::API_VERSION !== 1) {
-            throw new \RuntimeException('GitHub Integration requires Leantime Library 0.16.0 or later for shared settings rendering.');
+        if (SettingsPageRenderer::API_VERSION !== 2 || SettingsPage::API_VERSION !== 2) {
+            throw new \RuntimeException('GitHub Integration requires Leantime Library 0.17.0 or later for shared settings rendering.');
         }
 
         $callbackUrl = rtrim(BASE_URL, '/').'/GitHubIntegration/callback';
