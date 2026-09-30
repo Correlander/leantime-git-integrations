@@ -6,9 +6,9 @@ This repository contains one provider plugin for Leantime 3.10.0. It uses the ex
 
 The files in this repository root are the GitHub provider plugin. Install them so `composer.json` is at `app/Plugins/GitHubIntegration/composer.json`. The deployed plugin folder must be named exactly `GitHubIntegration`; `LeantimeGitIntegrations` is only the development/repository folder name. Copy the repository contents into `app/Plugins/GitHubIntegration/` (do not create an extra nested `GitHubIntegration/GitHubIntegration/` folder).
 
-Also update the existing `app/Plugins/LeantimeLib/` from the LeantimeLib project to version `0.14.0` or later for its project integration, To-do, and shared settings UI APIs.
+Install and enable the existing `LeantimeLib` plugin first, using version `0.14.1` or later. GitHub Integration requires the Library's shared settings renderer and contribution registries; it does not bundle duplicate settings UI or a fallback form.
 
-Enable both plugins for the full experience. GitHubIntegration contributes its Project Settings panel and To-do section through LeantimeLib's registries; LeantimeLib places the section at Leantime's supported after-Schedule hook and applies the Library-defined order. The GitHub backend routes remain independent, but both UI contributions need LeantimeLib enabled.
+Enable both plugins for the full experience. GitHubIntegration contributes its Project Settings panel and To-do section through LeantimeLib's registries; LeantimeLib places the section at Leantime's supported after-Schedule hook and applies the Library-defined order. Other GitHub OAuth/API routes remain independent, but the settings page and UI contributions require LeantimeLib enabled.
 
 If LeantimeLib is later disabled while GitHubIntegration remains enabled, neither GitHub UI contribution will render: Leantime's native Project Settings → Integrations content remains, and no GitHub section is added to the To-do modal. The GitHub backend routes still load. Disabling LeantimeLib does not uninstall GitHubIntegration, invoke its uninstall handler, remove its tables, or delete GitHub settings/tokens. Re-enable LeantimeLib to restore both centrally registered contributions.
 
@@ -43,7 +43,7 @@ If LeantimeLib is later disabled while GitHubIntegration remains enabled, neithe
 
 ## Contributor contract
 
-The provider contributes its Project Settings panel to LeantimeLib using `leantime.plugins.leantimelib.project.integrations.panels`. The Library sets the shared panel order and supports a project-specific order override. Provider controllers own their permissions, validation, storage, and secret handling. Settings pages may use the Library's shared typed-field renderer when it is enabled; the provider retains its route and save logic.
+The provider contributes its Project Settings panel to LeantimeLib using `leantime.plugins.leantimelib.project.integrations.panels`. The Library sets the shared panel order and supports a project-specific order override. Provider controllers own their permissions, validation, storage, and secret handling. The GitHub settings route uses the Library's shared typed-field renderer; the provider retains only its route, form submission, validation, and save logic.
 
 ## Troubleshooting logs
 

@@ -19,9 +19,6 @@ class Settings extends Controller
     public function get($params)
     {
         $config = app(GitHubStorage::class)->appConfigSummary();
-        $this->tpl->assign('clientId', $config['clientId'] ?? '');
-        $this->tpl->assign('secretSaved', $config !== null);
-        $this->tpl->assign('callbackUrl', rtrim(BASE_URL, '/').'/GitHubIntegration/callback');
         $this->tpl->assign('error', null);
         $this->assignSettingsContent($config['clientId'] ?? '', $config !== null);
         return $this->tpl->display('githubintegration.settings');
@@ -56,9 +53,6 @@ class Settings extends Controller
                 ]);
             }
             $config = app(GitHubStorage::class)->appConfigSummary();
-            $this->tpl->assign('clientId', trim((string) ($input['client_id'] ?? ($config['clientId'] ?? ''))));
-            $this->tpl->assign('secretSaved', $config !== null);
-            $this->tpl->assign('callbackUrl', rtrim(BASE_URL, '/').'/GitHubIntegration/callback');
             $this->tpl->assign('error', $exception instanceof ValidationException ? 'Check the submitted fields.' : 'The settings could not be saved.');
             $this->assignSettingsContent(trim((string) ($input['client_id'] ?? ($config['clientId'] ?? ''))), $config !== null);
             return $this->tpl->display('githubintegration.settings');
@@ -67,9 +61,8 @@ class Settings extends Controller
 
     private function assignSettingsContent(string $clientId, bool $secretSaved): void
     {
-        if (! class_exists(SettingsPageRenderer::class) || SettingsPageRenderer::API_VERSION !== 1) {
-            $this->tpl->assign('settingsContent', null);
-            return;
+        if (SettingsPageRenderer::API_VERSION !== 1) {
+            throw new \RuntimeException('GitHub Integration requires a compatible Leantime Library settings renderer.');
         }
 
         $callbackUrl = rtrim(BASE_URL, '/').'/GitHubIntegration/callback';
