@@ -3,10 +3,10 @@
     @if (!empty($oauthConnected)) <div class="alert alert-success" role="status">GitHub account connected.</div> @endif
     @if (!$appConfigured)
         <div class="alert alert-info">An administrator must configure the GitHub App before accounts can connect.</div>
-        @if ($canConfigure) <p><a href="{{ BASE_URL }}/GitHubIntegration/settings">Configure GitHub Integration</a></p> @endif
+        @if ($canConfigure) <p><a href="{{ BASE_URL }}/LeanGitHub/settings">Configure GitHub Integration</a></p> @endif
     @elseif (!$githubLogin)
         <p>Connect your own GitHub account to verify repository access and use this integration.</p>
-        <a class="btn btn-default" href="{{ BASE_URL }}/GitHubIntegration/connect?return_to={{ urlencode('/projects/showProject/'.$projectId.'#integrations') }}">Connect GitHub account</a>
+        <a class="btn btn-default" href="{{ BASE_URL }}/LeanGitHub/connect?return_to={{ urlencode('/projects/showProject/'.$projectId.'#integrations') }}">Connect GitHub account</a>
     @else
         <p>Connected GitHub account: <strong>{{ $githubLogin }}</strong></p>
         <button type="button" class="btn btn-default" data-github-disconnect>Disconnect my GitHub account</button>
@@ -19,7 +19,7 @@
     @endif
 
     @if ($canConfigure)
-    <form data-github-project-form method="post" action="{{ BASE_URL }}/GitHubIntegration/projects/{{ $projectId }}/save">
+    <form data-github-project-form method="post" action="{{ BASE_URL }}/LeanGitHub/projects/{{ $projectId }}/save">
         @csrf
         <div class="row">
             <div class="col-md-3"><label>Repository owner</label><input class="form-control" name="owner" required maxlength="255" value="{{ $connection->repository_owner ?? '' }}"></div>

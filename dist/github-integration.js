@@ -10,14 +10,14 @@
         const id = node.dataset.ticketId;
         node.innerHTML = '<p>Loading GitHub information…</p>';
         try {
-            const response = await fetch(`${appUrl}/GitHubIntegration/todos/${encodeURIComponent(id)}`, { credentials: 'same-origin', headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+            const response = await fetch(`${appUrl}/LeanGitHub/todos/${encodeURIComponent(id)}`, { credentials: 'same-origin', headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'GitHub information could not be loaded.');
             if (!data.connected) { node.innerHTML = data.appConfigured ? '<p>This project has no GitHub repository configured. Configure it in Project Settings → Integrations.</p>' : '<p>A Leantime administrator needs to configure the GitHub App first.</p>'; return; }
             if (!data.githubLinked) {
                 if (!data.appConfigured) { node.innerHTML = '<p>A Leantime administrator needs to configure the GitHub App before accounts can connect.</p>'; return; }
                 const returnTo = encodeURIComponent(`/projects/showProject/${node.dataset.projectId}#integrations`);
-                node.innerHTML = `<p>Connect your GitHub account to see <strong>${esc(data.repository || 'this repository')}</strong>.</p><a class="btn btn-default" href="${appUrl}/GitHubIntegration/connect?return_to=${returnTo}">Connect GitHub</a>`;
+                node.innerHTML = `<p>Connect your GitHub account to see <strong>${esc(data.repository || 'this repository')}</strong>.</p><a class="btn btn-default" href="${appUrl}/LeanGitHub/connect?return_to=${returnTo}">Connect GitHub</a>`;
                 return;
             }
 
@@ -30,7 +30,7 @@
             else html += '<p>Your Leantime role does not allow branch creation for this to-do.</p>';
             node.innerHTML = html;
         } catch (error) {
-            console.error('[GitHubIntegration] Could not load To-do GitHub details.', error);
+            console.error('[LeanGitHub] Could not load To-do GitHub details.', error);
             node.innerHTML = `<div class="alert alert-warning" role="alert">${esc(error.message)}</div>`;
         }
     }
@@ -54,7 +54,7 @@
         if (status) status.textContent = ' Saving…';
         if (button) button.disabled = true;
         try {
-            const action = projectForm ? form.action : `${appUrl}/GitHubIntegration/todos/${encodeURIComponent(form.closest('[data-github-todo]').dataset.ticketId)}/branches`;
+            const action = projectForm ? form.action : `${appUrl}/LeanGitHub/todos/${encodeURIComponent(form.closest('[data-github-todo]').dataset.ticketId)}/branches`;
             const response = await fetch(action, {
                 method: 'POST', credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': form.querySelector('[name="_token"]')?.value || form.closest('[data-github-todo]')?.dataset.csrf || '' },
@@ -65,7 +65,7 @@
             if (status) status.textContent = projectForm ? ' Saved.' : ` Created ${result.name}.`;
             if (branchForm) loadTodo(form.closest('[data-github-todo]'));
         } catch (error) {
-            console.error('[GitHubIntegration] GitHub action failed.', error);
+            console.error('[LeanGitHub] GitHub action failed.', error);
             if (status) status.textContent = ` ${error.message}`;
         } finally {
             if (button && button.isConnected) button.disabled = false;
@@ -83,14 +83,14 @@
         if (!window.confirm(disconnectUser ? 'Disconnect your GitHub account from Leantime?' : 'Disconnect this repository from the project? This will not delete GitHub branches.')) return;
         button.disabled = true;
         try {
-            const endpoint = disconnectUser ? `${appUrl}/GitHubIntegration/disconnect` : `${appUrl}/GitHubIntegration/projects/${encodeURIComponent(projectId)}`;
+            const endpoint = disconnectUser ? `${appUrl}/LeanGitHub/disconnect` : `${appUrl}/LeanGitHub/projects/${encodeURIComponent(projectId)}`;
             const response = await fetch(endpoint, { method: 'DELETE', credentials: 'same-origin', headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': panel.dataset.csrf } });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Could not disconnect.');
             if (disconnectProject) status.textContent = ' Repository disconnected. Reload the page to configure another.';
             else location.reload();
         } catch (error) {
-            console.error('[GitHubIntegration] Disconnect action failed.', error);
+            console.error('[LeanGitHub] Disconnect action failed.', error);
             status.textContent = ` ${error.message}`;
             button.disabled = false;
         }

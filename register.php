@@ -2,9 +2,9 @@
 
 use Leantime\Core\Events\EventDispatcher;
 use Leantime\Domain\Plugins\Services\Registration;
-use Leantime\Plugins\GitHubIntegration\Services\TodoGitSection;
+use Leantime\Plugins\LeanGitHub\Services\TodoGitSection;
 
-$registration = app()->makeWith(Registration::class, ['pluginId' => 'GitHubIntegration']);
+$registration = app()->makeWith(Registration::class, ['pluginId' => 'LeanGitHub']);
 $registration->addFooterJs(['github-integration.js']);
 $registration->addCss(['github-integration.css']);
 

@@ -1,6 +1,6 @@
 {
-  "/github-integration.js": "/github-integration.js",
-  "github-integration.js": "/github-integration.js",
-  "/github-integration.css": "/github-integration.css",
-  "github-integration.css": "/github-integration.css"
+  "/github-integration.js": "/github-integration.js?v=0.5.0",
+  "github-integration.js": "/github-integration.js?v=0.5.0",
+  "/github-integration.css": "/github-integration.css?v=0.5.0",
+  "github-integration.css": "/github-integration.css?v=0.5.0"
 }

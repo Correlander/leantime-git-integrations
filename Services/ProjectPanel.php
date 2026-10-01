@@ -1,6 +1,6 @@
 <?php
 
-namespace Leantime\Plugins\GitHubIntegration\Services;
+namespace Leantime\Plugins\LeanGitHub\Services;
 
 use Leantime\Core\Auth\Permissions\PermissionService;
 use Leantime\Domain\Projects\Permissions\ProjectsPermissions;

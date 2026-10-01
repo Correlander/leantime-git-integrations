@@ -1,6 +1,6 @@
 <?php
 
-namespace Leantime\Plugins\GitHubIntegration\Controllers;
+namespace Leantime\Plugins\LeanGitHub\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -14,8 +14,8 @@ use Leantime\Core\Exceptions\ValidationException;
 use Leantime\Domain\Projects\Permissions\ProjectsPermissions;
 use Leantime\Domain\Tickets\Permissions\TicketsPermissions;
 use Leantime\Domain\Tickets\Services\Tickets;
-use Leantime\Plugins\GitHubIntegration\Services\GitHubApi;
-use Leantime\Plugins\GitHubIntegration\Services\GitHubStorage;
+use Leantime\Plugins\LeanGitHub\Services\GitHubApi;
+use Leantime\Plugins\LeanGitHub\Services\GitHubStorage;
 use Throwable;
 
 class GitHub
@@ -33,13 +33,13 @@ class GitHub
         try { $config = $this->storage->appConfig(); }
         catch (Throwable $exception) {
             $this->logFailure('GitHub App secret could not be decrypted during connect.', $exception);
-            return redirect(BASE_URL.'/GitHubIntegration/settings?github_error=secret_key_changed');
+            return redirect(BASE_URL.'/LeanGitHub/settings?github_error=secret_key_changed');
         }
-        if ($config === null) return redirect(BASE_URL.'/GitHubIntegration/settings');
+        if ($config === null) return redirect(BASE_URL.'/LeanGitHub/settings');
         $state = Str::random(64);
-        $returnTo = (string) $request->query('return_to', '/GitHubIntegration/settings');
+        $returnTo = (string) $request->query('return_to', '/LeanGitHub/settings');
         if (! str_starts_with($returnTo, '/') || str_starts_with($returnTo, '//') || str_contains($returnTo, '\\') || str_contains($returnTo, "\r") || str_contains($returnTo, "\n")) {
-            $returnTo = '/GitHubIntegration/settings';
+            $returnTo = '/LeanGitHub/settings';
         }
         session([
             'github_integration.oauth_state' => $state,
@@ -59,9 +59,9 @@ class GitHub
     {
         $expected = (string) session()->pull('github_integration.oauth_state', '');
         $userId = (int) session()->pull('github_integration.oauth_user', 0);
-        $returnTo = (string) session()->pull('github_integration.oauth_return_to', '/GitHubIntegration/settings');
+        $returnTo = (string) session()->pull('github_integration.oauth_return_to', '/LeanGitHub/settings');
         if ($expected === '' || $userId < 1 || ! hash_equals($expected, (string) $request->query('state'))) {
-            return $this->oauthRedirect('/GitHubIntegration/settings', 'github_error=invalid_state');
+            return $this->oauthRedirect('/LeanGitHub/settings', 'github_error=invalid_state');
         }
         if ($request->filled('error')) return $this->oauthRedirect($returnTo, 'github_error=authorization_denied');
 
@@ -129,7 +129,7 @@ class GitHub
     {
         $connection = $this->storage->project($projectId);
         $token = $this->storage->userToken((int) session('userdata.id'));
-        return view('githubintegration::projectPanel', [
+        return view('leangithub::projectPanel', [
             'projectId' => $projectId,
             'connection' => $connection,
             'githubLogin' => $token['login'] ?? null,
@@ -253,7 +253,7 @@ class GitHub
     private function oauthRedirect(string $returnTo, string $query): mixed
     {
         if (! str_starts_with($returnTo, '/') || str_starts_with($returnTo, '//') || str_contains($returnTo, '\\') || str_contains($returnTo, "\r") || str_contains($returnTo, "\n")) {
-            $returnTo = '/GitHubIntegration/settings';
+            $returnTo = '/LeanGitHub/settings';
         }
         [$path, $fragment] = array_pad(explode('#', $returnTo, 2), 2, null);
         $separator = str_contains($path, '?') ? '&' : '?';

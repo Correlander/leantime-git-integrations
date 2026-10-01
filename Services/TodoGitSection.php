@@ -1,6 +1,6 @@
 <?php
 
-namespace Leantime\Plugins\GitHubIntegration\Services;
+namespace Leantime\Plugins\LeanGitHub\Services;
 
 class TodoGitSection
 {
@@ -32,7 +32,7 @@ class TodoGitSection
             'id' => 'github',
             'label' => 'GitHub',
             'description' => 'Connect this project to a repository and manage its GitHub settings.',
-            'view' => 'githubintegration::projectPanel',
+            'view' => 'leangithub::projectPanel',
             'data' => static fn (int $projectId): array => app(ProjectPanel::class)->data($projectId),
         ];
 

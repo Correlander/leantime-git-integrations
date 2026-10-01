@@ -1,6 +1,6 @@
 <?php
 
-namespace Leantime\Plugins\GitHubIntegration\Services;
+namespace Leantime\Plugins\LeanGitHub\Services;
 
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;

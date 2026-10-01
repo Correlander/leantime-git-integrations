@@ -1,7 +1,7 @@
 {
-  "name": "Leantime GitHub Integration",
+  "name": "lean-github",
   "description": "GitHub App integration for Leantime projects and To-dos, contributed through Leantime Library.",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "homepage": "https://github.com/Correlander/leantime-git-integrations",
   "authors": [
     {
@@ -13,7 +13,7 @@
   "type": "leantime-plugin",
   "autoload": {
     "psr-4": {
-      "Leantime\\Plugins\\GitHubIntegration\\": ""
+      "Leantime\\Plugins\\LeanGitHub\\": ""
     }
   },
   "license": "proprietary",

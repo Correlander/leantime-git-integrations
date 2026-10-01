@@ -1,12 +1,12 @@
 <?php
 
-namespace Leantime\Plugins\GitHubIntegration\Services;
+namespace Leantime\Plugins\LeanGitHub\Services;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 /** Plugin lifecycle and idempotent initial schema setup. */
-class GitHubIntegration
+class LeanGitHub
 {
     public function install(): void { $this->migrate(); }
 

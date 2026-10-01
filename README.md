@@ -1,16 +1,18 @@
-# Leantime GitHub Integrations
+# lean-github
 
-This repository contains one provider plugin for Leantime 3.10.0. It uses the existing **LeantimeLib** plugin as the central integration-panel registry. There is no second Hub plugin.
+This project contains one provider plugin for Leantime 3.10.0. It uses the existing **lean-lib** plugin as the central integration-panel registry. There is no second Hub plugin.
 
 ## Deployment folders
 
-The files in this repository root are the GitHub provider plugin. Install them so `composer.json` is at `app/Plugins/GitHubIntegration/composer.json`. The deployed plugin folder must be named exactly `GitHubIntegration`; `LeantimeGitIntegrations` is only the development/repository folder name. Copy the repository contents into `app/Plugins/GitHubIntegration/` (do not create an extra nested `GitHubIntegration/GitHubIntegration/` folder).
+The files in this project are the GitHub provider plugin. Install them so `composer.json` is at `app/Plugins/LeanGitHub/composer.json`. The Composer package name is `lean-github`; Leantime's installed folder/ID is `LeanGitHub` because it derives PHP namespaces and lifecycle class names from that folder. Copy the project contents into `app/Plugins/LeanGitHub/` (do not create an extra nested folder).
 
-Install and enable the existing `LeantimeLib` plugin first, using version `0.17.0` or later. GitHub Integration uses the Library's shared settings page builder and contribution registries; it does not bundle duplicate settings UI or a fallback form.
+Install and enable `LeanLib` (lean-lib) version `0.19.0` or later first. lean-github uses the Library's shared settings page builder and contribution registries; it does not bundle duplicate settings UI or a fallback form.
 
-Enable both plugins for the full experience. GitHubIntegration contributes its Project Settings panel and To-do section through LeantimeLib's registries; LeantimeLib places the section at Leantime's supported after-Schedule hook and applies the Library-defined order. Other GitHub OAuth/API routes remain independent, but the settings page and UI contributions require LeantimeLib enabled.
+Existing installations use the previous folder ID `GitHubIntegration`. Leantime treats `LeanGitHub` as a new plugin record. Disable the old entry, install and enable `LeanGitHub`, and verify the GitHub settings and user connection. Do not uninstall the old entry during migration if you need its plugin tables and stored credentials; the new plugin's installer reuses existing tables. The registered OAuth callback remains `/GitHubIntegration/callback`.
 
-If LeantimeLib is later disabled while GitHubIntegration remains enabled, neither GitHub UI contribution will render: Leantime's native Project Settings → Integrations content remains, and no GitHub section is added to the To-do modal. The GitHub backend routes still load. Disabling LeantimeLib does not uninstall GitHubIntegration, invoke its uninstall handler, remove its tables, or delete GitHub settings/tokens. Re-enable LeantimeLib to restore both centrally registered contributions.
+Enable both plugins for the full experience. LeanGitHub contributes its Project Settings panel and To-do section through LeanLib's registries; LeanLib places the section at Leantime's supported after-Schedule hook and applies the Library-defined order. Other GitHub OAuth/API routes remain independent, but the settings page and UI contributions require LeanLib enabled.
+
+If LeanLib is later disabled while LeanGitHub remains enabled, neither GitHub UI contribution will render: Leantime's native Project Settings → Integrations content remains, and no GitHub section is added to the To-do modal. The GitHub backend routes still load. Disabling LeanLib does not uninstall LeanGitHub, invoke its uninstall handler, remove its tables, or delete GitHub settings/tokens. Re-enable LeanLib to restore both centrally registered contributions.
 
 ## First setup
 
@@ -22,10 +24,10 @@ If LeantimeLib is later disabled while GitHubIntegration remains enabled, neithe
 
 ## Current behavior
 
-- Registers a Git section with LeantimeLib; the Library renders contributed inline sections at Leantime's native `beforeEndRightColumn` hook after Schedule and applies the saved contribution order.
+- Registers a Git section with LeanLib; the Library renders contributed inline sections at Leantime's native `beforeEndRightColumn` hook after Schedule and applies the saved contribution order.
 - Displays up to the first 100 branches and pull requests whose head branch starts with `{prefix}-p{projectId}-t{todoId}-`.
 - Creates a branch from the chosen base branch when the user has project-scoped `tickets.edit` for that To-do and their linked GitHub account can write to the repository. The branch name is `{prefix}-p{projectId}-t{todoId}-{description-slug}`.
-- Shows integration panels through LeantimeLib's `leantime.plugins.leantimelib.project.integrations.panels` filter. LeantimeLib replaces the stock Project Settings Integrations panel body while preserving the rest of the native project page.
+- Shows integration panels through LeanLib's `leantime.plugins.leantimelib.project.integrations.panels` filter. LeanLib replaces the stock Project Settings Integrations panel body while preserving the rest of the native project page.
 - Caches each user's To-do GitHub response for 30 seconds. Tokens stay server-side and are encrypted in plugin-owned tables.
 - Uses an idempotent plugin-managed schema version recorded in `zp_github_schema_migrations`; disabling the plugin preserves its tables.
 
@@ -36,14 +38,14 @@ If LeantimeLib is later disabled while GitHubIntegration remains enabled, neithe
 - At most one GitHub identity per Leantime user, and a GitHub identity cannot be linked to multiple Leantime users in the same instance.
 - Instance managers configure the GitHub App. Project repository configuration uses Leantime's global `projects.edit` permission (manager+ by default). Task branch creation requires project-scoped `tickets.edit`.
 - Disconnecting a GitHub account attempts to revoke its user authorization, then removes its local token. Disconnecting a project removes the local mapping only; remote branches are never deleted.
-- Disabling preserves plugin data. Uninstalling GitHubIntegration deletes its three plugin-owned tables. Back up before uninstall if configuration should be retained.
+- Disabling preserves plugin data. Uninstalling LeanGitHub deletes its three plugin-owned tables. Back up before uninstall if configuration should be retained.
 - GitHub data association is inferred from the branch naming convention; this version does not store task-to-branch links or listen for webhook updates.
 - A GitHub API outage does not serve stale results; the To-do section displays a recoverable error and can be retried by reopening the To-do.
 - Leantime 3.10.0 does not expose a typed project-deleted hook in the inspected source; delete the project repository mapping in its Integrations panel before deleting that Leantime project. Uninstall still purges all plugin tables.
 
 ## Contributor contract
 
-The provider contributes its Project Settings panel to LeantimeLib using `leantime.plugins.leantimelib.project.integrations.panels`. The Library supplies the shared title/description/divider/content frame, panel order, and project-specific order override. Provider controllers own their permissions, validation, storage, and secret handling. The GitHub settings route uses the Library's shared settings blocks; the provider retains only its route, field data, validation, and save logic.
+The provider contributes its Project Settings panel to LeanLib using `leantime.plugins.leantimelib.project.integrations.panels`. The Library supplies the shared title/description/divider/content frame, panel order, and project-specific order override. Provider controllers own their permissions, validation, storage, and secret handling. The GitHub settings route uses the Library's shared settings blocks; the provider retains only its route, field data, validation, and save logic.
 
 ## Troubleshooting logs
 
@@ -56,7 +58,7 @@ ls -lt storage/logs/leantime-*.log | head
 tail -F storage/logs/leantime-$(date +%F).log
 ```
 
-If the file is absent or does not receive entries, check `LEAN_LOG_CHANNELS` in the Leantime environment: an installation can route its stack to syslog/Sentry or customize/remove the `single` file channel. Browser-side failures are also printed in DevTools Console with the `[GitHubIntegration]` prefix.
+If the file is absent or does not receive entries, check `LEAN_LOG_CHANNELS` in the Leantime environment: an installation can route its stack to syslog/Sentry or customize/remove the `single` file channel. Browser-side failures are also printed in DevTools Console with the `[LeanGitHub]` prefix.
 
 ## License
 
